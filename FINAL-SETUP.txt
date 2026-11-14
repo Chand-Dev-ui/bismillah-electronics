@@ -1,0 +1,29 @@
+BISMILLAH ELECTRONICS — FINAL CONSOLIDATED UPDATE
+
+IMPORTANT TRUTH NOTE
+This package contains updated source code and a database migration. It has been syntax/structure checked locally, but it has NOT been connected to or live-tested against your private Supabase project. You must run the migration and redeploy the Edge Function. Manual JazzCash/EasyPaisa/Bank Transfer choices are NOT automatic payment gateway integrations.
+
+ONE-TIME UPDATE STEPS
+1. Keep a backup of your current working website folder.
+2. Extract this ZIP into a NEW folder.
+3. Copy your existing config.js into this new folder. Do not share it. It must contain only your Supabase Project URL and Publishable/anon public key. Never put service_role/secret keys in config.js.
+4. Supabase Dashboard > SQL Editor > New query: open supabase/final-migration.sql, paste all, and Run once. This adds wishlist sync, city delivery charges, contact messages, review moderation, order status and cancellation support, category field, and refreshes the create_store_order RPC.
+5. Supabase Dashboard > Edge Functions > create-order > Editor: replace code with supabase/functions/create-order/index.ts from this package, then Deploy. The current deployed function should remain named create-order.
+6. Supabase Edge Function Secrets must include SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY. The service role key belongs ONLY in Supabase function secrets, never in config.js or browser code.
+7. Sign in to admin.html with the Main Admin account. In Delivery Charges, add each city and fee before accepting orders. Orders for cities without a configured delivery fee will be rejected rather than silently charged zero.
+8. Test: customer signup/login; set a test product stock; set a delivery fee; place one test order; confirm order + order_items rows; confirm stock decreased; admin changes order status; customer sees status; customer cancellation works only before shipped; contact form message appears in admin; delivered order can submit a review and admin can approve it; wishlist sync works after customer sign-in.
+
+MAIN ADMIN SETUP
+After creating the owner account in Customer Login, find its UUID in Supabase Authentication > Users, then run in SQL Editor:
+update public.profiles set role='main_admin' where id='PASTE-USER-UUID-HERE';
+Do not expose the UUID publicly. Sub-admin role can be assigned by the Main Admin/owner in SQL using role='sub_admin'. Main Admin alone can change delivery pricing.
+
+LIMITATIONS THAT ARE STILL REAL
+- JazzCash, EasyPaisa and bank transfer are manual confirmation methods, not automatic gateway/API payments. Merchant onboarding and credentials are required for automatic payments.
+- No live payment, real carrier/shipping integration, SMS/OTP service, automated refund, or production fraud/rate-limit service is included.
+- Product image uploads accept up to 5 images and store their URLs, but the storefront currently displays the first image rather than a full image gallery.
+- Flash-sale countdown and advanced analytics are not included.
+- Local static-file testing is not the same as a production deployment. Use a local static server or deploy to Netlify for final browser-origin testing.
+
+ROLLBACK
+If the update causes a problem, restore your backed-up previous folder. The migration adds tables/columns/policies/functions but does not delete existing products or orders.
